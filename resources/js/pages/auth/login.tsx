@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import { register } from '@/routes';
 
 type Props = {
     status?: string;
@@ -96,6 +97,11 @@ export default function Login({ status, canResetPassword }: Props) {
                     {status}
                 </div>
             )}
+
+            <div className="space-x-1 text-center text-sm text-muted-foreground">
+                <span>Don't have an account?</span>
+                <TextLink href={register()}>Register</TextLink>
+            </div>
         </>
     );
 }

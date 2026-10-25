@@ -13,9 +13,6 @@ import {
     ShieldCheck,
     MessageCircle,
     Smartphone,
-    CreditCard,
-    Building2,
-    AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { dashboard, login, register } from '@/routes';
@@ -48,7 +45,7 @@ export default function Contact({ status }: Props) {
     const [copiedEmail, setCopiedEmail] = useState(false);
 
     const handleCopy = (text: string, type: 'phone' | 'email') => {
-        navigator.clipboard.writeText(text);
+        void navigator.clipboard.writeText(text);
         if (type === 'phone') {
             setCopiedPhone(true);
             setTimeout(() => setCopiedPhone(false), 2000);

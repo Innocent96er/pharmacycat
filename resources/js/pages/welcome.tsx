@@ -20,8 +20,6 @@ import {
     Search,
     ChevronRight,
     ArrowRight,
-    Sun,
-    Moon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { dashboard, login, register } from '@/routes';
@@ -446,7 +444,7 @@ export default function Welcome() {
                 throw new Error(data.message || 'Checkout failed');
             }
         } catch (err: unknown) {
-            const errorMsg =
+            const _errorMsg =
                 err instanceof Error
                     ? err.message
                     : 'Checkout encountered an error';

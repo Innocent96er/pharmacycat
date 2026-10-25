@@ -11,14 +11,16 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             <div className="space-y-6">
                 <p className="text-center text-sm text-muted-foreground">
-                    Thanks for signing up! Before getting started, please verify your email
-                    address by clicking the link we just sent to your inbox. If you didn't
-                    receive it, click below to request another.
+                    Thanks for signing up! Before getting started, please verify
+                    your email address by clicking the link we just sent to your
+                    inbox. If you didn't receive it, click below to request
+                    another.
                 </p>
 
                 {status === 'verification-link-sent' && (
                     <div className="text-center text-sm font-medium text-green-600">
-                        A new verification link has been sent to your email address.
+                        A new verification link has been sent to your email
+                        address.
                     </div>
                 )}
 

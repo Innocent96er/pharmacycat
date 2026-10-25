@@ -5,7 +5,7 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
-/* Theme colors: light mode only, dark mode is disabled */
+/* Theme colors: light mode only, dark mode is removed */
 @custom-variant dark (&:is(.dark *));
 
 @theme {

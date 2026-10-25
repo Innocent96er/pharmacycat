@@ -4,6 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        {{-- Dark mode detection removed: site is light theme only --}}
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {

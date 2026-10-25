@@ -726,7 +726,7 @@ export default function Welcome() {
                                                     )}
                                                 </div>
 
-                                                {/* Medicine Visual Box */}
+                                                {/* Medicine Visual Box: shows product image, falls back to pill icon */}
                                                 <div className="my-5 flex h-36 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-tr from-slate-100 to-emerald-50/50 p-4 transition-colors group-hover:from-emerald-50 group-hover:to-teal-50">
                                                     {product.image ? (
                                                         <img

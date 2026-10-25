@@ -679,6 +679,9 @@ export default function Welcome() {
                                 </button>
                             )}
                         </div>
+    
+                    
+        
 
                         {/* Product Cards Grid */}
                         {filteredProducts.length === 0 ? (
@@ -738,14 +741,14 @@ export default function Welcome() {
                                                 </div>
 
                                                 {/* Title & Dosage */}
-                                                <h3 className="text-base font-bold text-slate-900 group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">
+                                                <h3 className="text-base font-bold text-slate-900 group-hover:text-emerald-600">
                                                     {product.name}
                                                 </h3>
-                                                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                                                <p className="text-xs font-semibold text-emerald-700">
                                                     {product.dosage}
                                                 </p>
 
-                                                <p className="mt-2 line-clamp-2 text-xs text-slate-500 dark:text-zinc-400">
+                                                <p className="mt-2 line-clamp-2 text-xs text-slate-500">
                                                     {product.description}
                                                 </p>
                                             </div>

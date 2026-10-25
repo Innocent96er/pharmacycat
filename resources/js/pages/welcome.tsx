@@ -34,6 +34,7 @@ interface Product {
     price: number;
     description: string;
     badge?: string;
+    image?: string;
     rating: number;
     reviews: number;
     inStock: boolean;
@@ -67,6 +68,7 @@ const PRODUCTS: Product[] = [
         price: 45.0,
         description: 'Fast-acting relief for headaches, dental pain, and fever with caffeine booster.',
         badge: 'Best Seller',
+        image: '/images/products/paracetamol.jpg',
         rating: 4.9,
         reviews: 320,
         inStock: true,
@@ -78,6 +80,7 @@ const PRODUCTS: Product[] = [
         category: 'Pain Relief',
         price: 65.0,
         description: 'Targeted anti-inflammatory formula for backaches, sprains, and joint discomfort.',
+        image: '/images/products/ibuprofen.png',
         rating: 4.8,
         reviews: 215,
         inStock: true,
@@ -90,6 +93,7 @@ const PRODUCTS: Product[] = [
         price: 120.0,
         description: 'High-potency immune support with antioxidant bioflavonoids in tangy orange flavour.',
         badge: 'Immunity Boost',
+        image: '/images/products/vitamin-c.jpg',
         rating: 5.0,
         reviews: 412,
         inStock: true,
@@ -101,6 +105,7 @@ const PRODUCTS: Product[] = [
         category: 'Vitamins',
         price: 250.0,
         description: '24 vital micronutrients and minerals formulated for daily stamina and vitality.',
+        image: '/images/products/daily-multivitamin.jpg',
         rating: 4.7,
         reviews: 180,
         inStock: true,
@@ -113,6 +118,7 @@ const PRODUCTS: Product[] = [
         price: 150.0,
         description: 'Broad-spectrum antibiotic therapy for physician-guided respiratory and bacterial care.',
         badge: 'Pharmacist Monitored',
+        image: '/images/products/amoxycillin-trihydrate.jpg',
         rating: 4.9,
         reviews: 95,
         inStock: true,
@@ -124,6 +130,7 @@ const PRODUCTS: Product[] = [
         category: 'Antibiotics',
         price: 180.0,
         description: 'Concentrated 3-day antibiotic regimen prescribed for bacterial infection control.',
+        image: '/images/products/azithromycin.webp',
         rating: 4.8,
         reviews: 84,
         inStock: true,
@@ -136,6 +143,7 @@ const PRODUCTS: Product[] = [
         price: 95.0,
         description: 'Non-drowsy daytime decongestant combined with soothing menthol nighttime relief.',
         badge: 'Winter Essential',
+        image: '/images/products/syrup.jpg',
         rating: 4.8,
         reviews: 260,
         inStock: true,
@@ -147,6 +155,7 @@ const PRODUCTS: Product[] = [
         category: 'Cold & Flu',
         price: 50.0,
         description: 'Dual antibacterial and throat-numbing agents for rapid soreness alleviation.',
+        image: '/images/products/codral.jpg',
         rating: 4.6,
         reviews: 145,
         inStock: true,
@@ -159,6 +168,7 @@ const PRODUCTS: Product[] = [
         price: 280.0,
         description: 'Hypoallergenic intense moisturizing lotion enriched with 3 essential ceramides.',
         badge: 'Dermatologist Choice',
+        image: '/images/products/cream.jpg',
         rating: 4.9,
         reviews: 310,
         inStock: true,
@@ -170,6 +180,7 @@ const PRODUCTS: Product[] = [
         category: 'Skincare',
         price: 85.0,
         description: 'Fast calm for skin irritation, eczema flare-ups, redness, and insect bites.',
+        image: '/images/products/cortizone.jpg',
         rating: 4.7,
         reviews: 118,
         inStock: true,
@@ -181,6 +192,7 @@ const PRODUCTS: Product[] = [
         category: 'Other',
         price: 110.0,
         description: 'Sterile hospital-grade wound cleansing, non-stick dressing, and waterproof tape.',
+        image: '/images/products/first-aid.png',
         rating: 4.9,
         reviews: 88,
         inStock: true,
@@ -193,6 +205,7 @@ const PRODUCTS: Product[] = [
         price: 550.0,
         description: 'Clinically validated cardiac pulse and pressure monitor with LED display.',
         badge: 'Medical Device',
+        image: '/images/products/bp-monitor.jpg',
         rating: 4.9,
         reviews: 142,
         inStock: true,
@@ -711,8 +724,17 @@ export default function Welcome() {
                                                 </div>
 
                                                 {/* Medicine Visual Box */}
-                                                <div className="my-5 flex h-36 w-full items-center justify-center rounded-xl bg-gradient-to-tr from-slate-100 to-emerald-50/50 p-4 transition-colors group-hover:from-emerald-50 group-hover:to-teal-50 dark:from-zinc-800 dark:to-zinc-800/50 dark:group-hover:from-zinc-800 dark:group-hover:to-emerald-950/30">
-                                                    <Pill className="h-16 w-16 text-emerald-600 transition-transform duration-300 group-hover:scale-110 dark:text-emerald-400" />
+                                                <div className="my-5 flex h-36 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-tr from-slate-100 to-emerald-50/50 p-4 transition-colors group-hover:from-emerald-50 group-hover:to-teal-50">
+                                                    {product.image ? (
+                                                        <img
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            loading="lazy"
+                                                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        <Pill className="h-16 w-16 text-emerald-600 transition-transform duration-300 group-hover:scale-110" />
+                                                    )}
                                                 </div>
 
                                                 {/* Title & Dosage */}

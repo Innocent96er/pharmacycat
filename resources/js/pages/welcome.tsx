@@ -24,7 +24,7 @@ import {
     Moon,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, register, logout } from '@/routes';
 
 interface Product {
     id: number;
@@ -486,12 +486,22 @@ export default function Welcome() {
 
                         {/* Auth state */}
                         {auth?.user ? (
-                            <Link
-                                href={dashboard()}
-                                className="hidden sm:inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow transition-all hover:bg-slate-800 dark:bg-zinc-100 dark:text-slate-900 dark:hover:bg-white"
-                            >
-                                Dashboard
-                            </Link>
+                            <div className="hidden sm:flex items-center gap-2">
+                                <Link
+                                    href={dashboard()}
+                                    className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow transition-all hover:bg-slate-800 dark:bg-zinc-100 dark:text-slate-900 dark:hover:bg-white"
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href={logout()}
+                                    method="post"
+                                    as="button"
+                                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-rose-900 dark:hover:bg-rose-950/40 dark:hover:text-rose-400"
+                                >
+                                    Log out
+                                </Link>
+                            </div>
                         ) : (
                             <div className="hidden sm:flex items-center gap-2">
                                 <Link

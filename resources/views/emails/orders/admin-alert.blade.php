@@ -13,6 +13,7 @@ A new order has just been placed on PharmacyCat.
 | Customer | {{ $order['customer_name'] }} |
 | Email | {{ $order['customer_email'] }} |
 | Items | {{ $order['items_count'] }} |
+| Delivery | {{ $order['courier_name'] ?? $order['delivery_type'] }} |
 | Total | **{{ $order['total'] }}** |
 
 ---

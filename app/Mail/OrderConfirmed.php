@@ -18,7 +18,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
      * @param array{
      *     order_number: string,
      *     customer_name: string,
-     *     items: array<int, array{name: string, qty: int, price: string}>,
+     *     items: array<int, array{name: string, qty: int, price: string, image: ?string}>,
      *     total: string,
      * } $order
      */
@@ -40,7 +40,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.orders.confirmed',
+            view: 'emails.orders.confirmed',
             with: [
                 'order' => $this->order,
             ],

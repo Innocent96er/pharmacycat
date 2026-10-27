@@ -1,3 +1,4 @@
+```php
 <?php
 
 namespace App\Http\Controllers;
@@ -11,12 +12,29 @@ use Inertia\Response;
 class MedicineController extends Controller
 {
     /**
-     * Display a listing of the medicines (READ - List).
+     * Display a listing of the medicines.
      */
     public function index(Request $request): Response
     {
         $search = $request->input('search');
         $category = $request->input('category');
+
+        $categories = [
+            'All',
+            'Pain Relief',
+            'Antibiotics',
+            'Vitamins & Supplements',
+            'Cold & Flu',
+            'Skincare',
+            'Sun Protection',
+            'Oral Care',
+            'Feminine Care',
+            'Sexual Health',
+            'First Aid & Wound Care',
+            'Medical Devices',
+            'Supports & Braces',
+            'Other',
+        ];
 
         $medicines = Medicine::query()
             ->when($search, function ($query, $search) {
@@ -33,16 +51,6 @@ class MedicineController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $categories = [
-            'All',
-            'Pain Relief',
-            'Antibiotics',
-            'Vitamins',
-            'Cold & Flu',
-            'Skincare',
-            'Other',
-        ];
-
         return Inertia::render('medicines/index', [
             'medicines' => $medicines,
             'categories' => $categories,
@@ -54,7 +62,7 @@ class MedicineController extends Controller
     }
 
     /**
-     * Show the form for creating a new medicine (CREATE - Form).
+     * Show the form for creating a new medicine.
      */
     public function create(): Response
     {
@@ -62,26 +70,37 @@ class MedicineController extends Controller
             'categories' => [
                 'Pain Relief',
                 'Antibiotics',
-                'Vitamins',
+                'Vitamins & Supplements',
                 'Cold & Flu',
                 'Skincare',
+                'Sun Protection',
+                'Oral Care',
+                'Feminine Care',
+                'Sexual Health',
+                'First Aid & Wound Care',
+                'Medical Devices',
+                'Supports & Braces',
                 'Other',
             ],
         ]);
     }
 
     /**
-     * Store a newly created medicine in storage (CREATE - Store).
+     * Store a newly created medicine.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'dosage' => ['nullable', 'string', 'max:100'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => [
+                'required',
+                'string',
+                'in:Pain Relief,Antibiotics,Vitamins & Supplements,Cold & Flu,Skincare,Sun Protection,Oral Care,Feminine Care,Sexual Health,First Aid & Wound Care,Medical Devices,Supports & Braces,Other',
+            ],
             'price' => ['required', 'numeric', 'min:0'],
             'stock_quantity' => ['required', 'integer', 'min:0'],
-            'in_stock' => ['boolean'],
+            'in_stock' => ['sometimes', 'boolean'],
             'badge' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string', 'max:2000'],
             'manufacturer' => ['nullable', 'string', 'max:255'],
@@ -92,11 +111,13 @@ class MedicineController extends Controller
 
         Medicine::create($validated);
 
-        return redirect()->route('medicines.index')->with('success', 'Medicine added successfully to the catalog.');
+        return redirect()
+            ->route('medicines.index')
+            ->with('success', 'Medicine added successfully to the catalog.');
     }
 
     /**
-     * Display the specified medicine (READ - Show).
+     * Display a specific medicine.
      */
     public function show(Medicine $medicine): Response
     {
@@ -106,7 +127,7 @@ class MedicineController extends Controller
     }
 
     /**
-     * Show the form for editing the specified medicine (UPDATE - Form).
+     * Show the form for editing a medicine.
      */
     public function edit(Medicine $medicine): Response
     {
@@ -115,26 +136,37 @@ class MedicineController extends Controller
             'categories' => [
                 'Pain Relief',
                 'Antibiotics',
-                'Vitamins',
+                'Vitamins & Supplements',
                 'Cold & Flu',
                 'Skincare',
+                'Sun Protection',
+                'Oral Care',
+                'Feminine Care',
+                'Sexual Health',
+                'First Aid & Wound Care',
+                'Medical Devices',
+                'Supports & Braces',
                 'Other',
             ],
         ]);
     }
 
     /**
-     * Update the specified medicine in storage (UPDATE - Save).
+     * Update an existing medicine.
      */
     public function update(Request $request, Medicine $medicine): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'dosage' => ['nullable', 'string', 'max:100'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => [
+                'required',
+                'string',
+                'in:Pain Relief,Antibiotics,Vitamins & Supplements,Cold & Flu,Skincare,Sun Protection,Oral Care,Feminine Care,Sexual Health,First Aid & Wound Care,Medical Devices,Supports & Braces,Other',
+            ],
             'price' => ['required', 'numeric', 'min:0'],
             'stock_quantity' => ['required', 'integer', 'min:0'],
-            'in_stock' => ['boolean'],
+            'in_stock' => ['sometimes', 'boolean'],
             'badge' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string', 'max:2000'],
             'manufacturer' => ['nullable', 'string', 'max:255'],
@@ -145,16 +177,20 @@ class MedicineController extends Controller
 
         $medicine->update($validated);
 
-        return redirect()->route('medicines.index')->with('success', 'Medicine updated successfully.');
+        return redirect()
+            ->route('medicines.index')
+            ->with('success', 'Medicine updated successfully.');
     }
 
     /**
-     * Remove the specified medicine from storage (DELETE).
+     * Delete a medicine.
      */
     public function destroy(Medicine $medicine): RedirectResponse
     {
         $medicine->delete();
 
-        return redirect()->route('medicines.index')->with('success', 'Medicine removed from the catalog.');
+        return redirect()
+            ->route('medicines.index')
+            ->with('success', 'Medicine removed from the catalog.');
     }
 }

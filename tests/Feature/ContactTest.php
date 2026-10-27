@@ -23,7 +23,7 @@ test('visitors can submit contact enquiry and deliver to business email', functi
     $response->assertSessionHas('status');
 
     Mail::assertQueued(ContactEnquiry::class, function ($mail) {
-        return $mail->hasTo('pharmarcycat@gmail.com')
+        return $mail->hasTo(config('mail.admin_address', config('mail.from.address')))
             && $mail->enquiry['sender_name'] === 'Jane Customer';
     });
 });

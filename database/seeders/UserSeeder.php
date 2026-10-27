@@ -21,8 +21,8 @@ class UserSeeder extends Seeder
             // (so nobody can sign themselves up as admin through the register form)
             $user = User::firstOrNew(['email' => $data['email']]);
             $user->forceFill([
-                'name'     => $data['name'],
-                'role'     => $data['role'],
+                'name' => $data['name'],
+                'role' => $data['role'],
                 'password' => Hash::make('password'),   // demo only, change before any real use
             ])->save();
         }

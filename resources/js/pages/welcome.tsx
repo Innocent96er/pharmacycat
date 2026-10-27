@@ -297,7 +297,9 @@ export default function Welcome() {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             if (params.get('verified') === '1') {
-                toast.success('Your email has been verified! Welcome to PharmacyCat.');
+                toast.success(
+                    'Your email has been verified! Welcome to PharmacyCat.',
+                );
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, document.title, newUrl);
             }
@@ -1637,7 +1639,9 @@ export default function Welcome() {
                                             <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/90 p-2.5 text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
                                                 <span className="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                                                 <span>
-                                                    A PharmacyCat staff member will book your courier and call you to confirm.
+                                                    A PharmacyCat staff member
+                                                    will book your courier and
+                                                    call you to confirm.
                                                 </span>
                                             </div>
                                         )}
@@ -2018,7 +2022,9 @@ export default function Welcome() {
 
                                         <div className="space-y-1.5 text-slate-600 dark:text-zinc-300">
                                             <div className="flex justify-between">
-                                                <span>Fulfillment / Courier</span>
+                                                <span>
+                                                    Fulfillment / Courier
+                                                </span>
                                                 <span className="font-bold text-slate-900 dark:text-white">
                                                     {orderResult.courierName}
                                                 </span>
@@ -2031,7 +2037,7 @@ export default function Welcome() {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Payment Method</span>
-                                                <span className="font-bold uppercase text-slate-900 dark:text-white">
+                                                <span className="font-bold text-slate-900 uppercase dark:text-white">
                                                     {orderResult.paymentMethod.replace(
                                                         '_',
                                                         ' ',
@@ -2058,7 +2064,13 @@ export default function Welcome() {
                                             orderResult.deliveryType ===
                                                 'indrive') && (
                                             <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/90 p-2.5 text-left text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
-                                                🛵 <strong>Courier Dispatch:</strong> A PharmacyCat staff member will book your courier and call you to confirm.
+                                                🛵{' '}
+                                                <strong>
+                                                    Courier Dispatch:
+                                                </strong>{' '}
+                                                A PharmacyCat staff member will
+                                                book your courier and call you
+                                                to confirm.
                                             </div>
                                         )}
 
@@ -2081,13 +2093,18 @@ export default function Welcome() {
                                                             <div className="flex min-w-0 items-center gap-2">
                                                                 {item.image && (
                                                                     <img
-                                                                        src={item.image}
+                                                                        src={
+                                                                            item.image
+                                                                        }
                                                                         alt=""
                                                                         className="h-9 w-9 shrink-0 rounded-lg object-cover"
                                                                     />
                                                                 )}
                                                                 <span className="truncate">
-                                                                    {item.quantity}x{' '}
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                    x{' '}
                                                                     {item.name}
                                                                 </span>
                                                             </div>

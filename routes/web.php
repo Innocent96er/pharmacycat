@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::inertia('/', 'welcome')->name('home');
+
+Route::get('contact', [ContactController::class, 'show'])->name('contact');
+Route::post('contact', [ContactController::class, 'send'])->name('contact.send');
+Route::post('checkout', [OrderController::class, 'store'])->name('checkout.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // The starter kit sends everyone to /dashboard after login.

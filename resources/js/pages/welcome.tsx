@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { useState, useMemo, useEffect } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ShoppingCart,
     Plus,
@@ -20,9 +20,11 @@ import {
     Search,
     ChevronRight,
     ArrowRight,
+    LogOut,
+    Car,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, logout, register } from '@/routes';
 
 interface Product {
     id: number;
@@ -48,19 +50,67 @@ interface CartItem extends Product {
     quantity: number;
 }
 
+export type DeliveryType = 'home_delivery' | 'yango' | 'indrive' | 'pickup';
+
+export interface DeliveryOptionConfig {
+    id: DeliveryType;
+    name: string;
+    subtitle: string;
+    eta: string;
+    fee: number;
+    freeOverThreshold?: number;
+    isCourier?: boolean;
+}
+
+export const DELIVERY_OPTIONS: Record<DeliveryType, DeliveryOptionConfig> = {
+    home_delivery: {
+        id: 'home_delivery',
+        name: 'Home Delivery',
+        subtitle: 'PharmacyCat rider',
+        eta: '30 - 45 mins',
+        fee: 50,
+        freeOverThreshold: 350,
+    },
+    yango: {
+        id: 'yango',
+        name: 'Yango Delivery',
+        subtitle: 'Ride-hailing express',
+        eta: '20 - 40 mins',
+        fee: 60,
+        isCourier: true,
+    },
+    indrive: {
+        id: 'indrive',
+        name: 'inDrive Delivery',
+        subtitle: 'City courier',
+        eta: '25 - 45 mins',
+        fee: 55,
+        isCourier: true,
+    },
+    pickup: {
+        id: 'pickup',
+        name: 'Counter Pickup',
+        subtitle: 'Dispensary counter',
+        eta: 'Ready in 15 mins',
+        fee: 0,
+    },
+};
+
 interface OrderConfirmation {
     orderNumber: string;
     customerName: string;
     customerEmail: string;
     customerPhone: string;
     deliveryAddress: string;
-    deliveryType: 'delivery' | 'pickup';
+    deliveryType: DeliveryType;
+    courierName: string;
     paymentMethod: 'card' | 'mobile_money' | 'cash';
     items: CartItem[];
     subtotal: number;
     deliveryFee: number;
     total: number;
     placedAt: string;
+    eta: string;
 }
 
 const PRODUCTS: Product[] = [
@@ -243,6 +293,19 @@ export default function Welcome() {
         auth?: { user?: { name: string; email: string } };
     };
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('verified') === '1') {
+                toast.success(
+                    'Your email has been verified! Welcome to PharmacyCat.',
+                );
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+    }, []);
+
     // State
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -263,9 +326,8 @@ export default function Welcome() {
     const [deliveryAddress, setDeliveryAddress] = useState(
         'Plot 482, Great East Road, Lusaka',
     );
-    const [deliveryType, setDeliveryType] = useState<'delivery' | 'pickup'>(
-        'delivery',
-    );
+    const [deliveryType, setDeliveryType] =
+        useState<DeliveryType>('home_delivery');
     const [paymentMethod, setPaymentMethod] = useState<
         'card' | 'mobile_money' | 'cash'
     >('mobile_money');
@@ -309,8 +371,13 @@ export default function Welcome() {
     }, [cart]);
 
     const deliveryFee = useMemo(() => {
-        if (cart.length === 0 || deliveryType === 'pickup') return 0;
-        return subtotal >= 350 ? 0 : 50;
+        if (cart.length === 0) return 0;
+        const config = DELIVERY_OPTIONS[deliveryType];
+        if (!config) return 0;
+        if (config.freeOverThreshold && subtotal >= config.freeOverThreshold) {
+            return 0;
+        }
+        return config.fee;
     }, [cart.length, deliveryType, subtotal]);
 
     const total = useMemo(() => {
@@ -381,6 +448,7 @@ export default function Welcome() {
                     ? 'PharmacyCat Counter Collection'
                     : deliveryAddress,
             delivery_type: deliveryType,
+            courier_name: DELIVERY_OPTIONS[deliveryType].name,
             payment_method: paymentMethod,
             payment_details: {
                 network: mobileMoneyNetwork,
@@ -391,6 +459,7 @@ export default function Welcome() {
                 name: `${i.name} (${i.dosage})`,
                 qty: i.quantity,
                 price: i.price,
+                image: i.image,
             })),
             subtotal: parseFloat(subtotal.toFixed(2)),
             delivery_fee: parseFloat(deliveryFee.toFixed(2)),
@@ -424,6 +493,7 @@ export default function Welcome() {
                     customerPhone: customerPhone,
                     deliveryAddress: orderPayload.delivery_address,
                     deliveryType: deliveryType,
+                    courierName: DELIVERY_OPTIONS[deliveryType].name,
                     paymentMethod: paymentMethod,
                     items: [...cart],
                     subtotal: subtotal,
@@ -433,6 +503,7 @@ export default function Welcome() {
                         hour: '2-digit',
                         minute: '2-digit',
                     }),
+                    eta: DELIVERY_OPTIONS[deliveryType].eta,
                 };
                 setOrderResult(conf);
                 setCart([]);
@@ -460,6 +531,7 @@ export default function Welcome() {
                         ? 'PharmacyCat Counter Collection'
                         : deliveryAddress,
                 deliveryType: deliveryType,
+                courierName: DELIVERY_OPTIONS[deliveryType].name,
                 paymentMethod: paymentMethod,
                 items: [...cart],
                 subtotal: subtotal,
@@ -469,6 +541,7 @@ export default function Welcome() {
                     hour: '2-digit',
                     minute: '2-digit',
                 }),
+                eta: DELIVERY_OPTIONS[deliveryType].eta,
             };
             setOrderResult(conf);
             setCart([]);
@@ -568,12 +641,24 @@ export default function Welcome() {
 
                         {/* Auth state */}
                         {auth?.user ? (
-                            <Link
-                                href={dashboard()}
-                                className="hidden items-center rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow transition-all hover:bg-slate-800 sm:inline-flex dark:bg-zinc-100 dark:text-slate-900 dark:hover:bg-white"
-                            >
-                                Dashboard
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href={dashboard()}
+                                    className="items-center rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white shadow transition-all hover:bg-slate-800 dark:bg-zinc-100 dark:text-slate-900 dark:hover:bg-white"
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href={logout()}
+                                    method="post"
+                                    as="button"
+                                    onClick={() => router.flushAll()}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-rose-900/50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400"
+                                >
+                                    <LogOut className="h-3.5 w-3.5" />
+                                    <span>Log out</span>
+                                </Link>
+                            </div>
                         ) : (
                             <div className="hidden items-center gap-2 sm:flex">
                                 <Link
@@ -1383,40 +1468,190 @@ export default function Welcome() {
                                         <label className="text-xs font-bold text-slate-900 uppercase dark:text-white">
                                             Delivery Option
                                         </label>
-                                        <div className="mt-2 grid grid-cols-2 gap-3">
+                                        <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                                            {/* Home Delivery */}
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setDeliveryType('delivery')
+                                                    setDeliveryType(
+                                                        'home_delivery',
+                                                    )
                                                 }
-                                                className={`flex items-center gap-2 rounded-xl border p-3 text-left transition ${
-                                                    deliveryType === 'delivery'
-                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
-                                                        : 'border-slate-200 bg-white text-slate-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                                                className={`flex items-start gap-2.5 rounded-xl border p-3 text-left transition ${
+                                                    deliveryType ===
+                                                    'home_delivery'
+                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-200'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600'
                                                 }`}
                                             >
-                                                <Truck className="h-4 w-4 text-emerald-600" />
-                                                <span className="text-xs">
-                                                    Home Delivery
-                                                </span>
+                                                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                                    <Truck className="h-4 w-4" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-bold">
+                                                            Home Delivery
+                                                        </span>
+                                                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                                            {subtotal >=
+                                                            (DELIVERY_OPTIONS
+                                                                .home_delivery
+                                                                .freeOverThreshold ??
+                                                                350)
+                                                                ? 'FREE'
+                                                                : `K${DELIVERY_OPTIONS.home_delivery.fee.toFixed(2)}`}
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-0.5 text-[11px] font-normal text-slate-500 dark:text-zinc-400">
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .home_delivery
+                                                                .subtitle
+                                                        }{' '}
+                                                        •{' '}
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .home_delivery
+                                                                .eta
+                                                        }
+                                                    </p>
+                                                </div>
                                             </button>
+
+                                            {/* Yango Delivery */}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setDeliveryType('yango')
+                                                }
+                                                className={`flex items-start gap-2.5 rounded-xl border p-3 text-left transition ${
+                                                    deliveryType === 'yango'
+                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-200'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600'
+                                                }`}
+                                            >
+                                                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                                                    <Car className="h-4 w-4" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-bold">
+                                                            Yango Delivery
+                                                        </span>
+                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">
+                                                            K
+                                                            {DELIVERY_OPTIONS.yango.fee.toFixed(
+                                                                2,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-0.5 text-[11px] font-normal text-slate-500 dark:text-zinc-400">
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .yango.subtitle
+                                                        }{' '}
+                                                        •{' '}
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .yango.eta
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </button>
+
+                                            {/* inDrive Delivery */}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setDeliveryType('indrive')
+                                                }
+                                                className={`flex items-start gap-2.5 rounded-xl border p-3 text-left transition ${
+                                                    deliveryType === 'indrive'
+                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-200'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600'
+                                                }`}
+                                            >
+                                                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+                                                    <Car className="h-4 w-4" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-bold">
+                                                            inDrive Delivery
+                                                        </span>
+                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">
+                                                            K
+                                                            {DELIVERY_OPTIONS.indrive.fee.toFixed(
+                                                                2,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-0.5 text-[11px] font-normal text-slate-500 dark:text-zinc-400">
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .indrive
+                                                                .subtitle
+                                                        }{' '}
+                                                        •{' '}
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .indrive.eta
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </button>
+
+                                            {/* Counter Pickup */}
                                             <button
                                                 type="button"
                                                 onClick={() =>
                                                     setDeliveryType('pickup')
                                                 }
-                                                className={`flex items-center gap-2 rounded-xl border p-3 text-left transition ${
+                                                className={`flex items-start gap-2.5 rounded-xl border p-3 text-left transition ${
                                                     deliveryType === 'pickup'
-                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
-                                                        : 'border-slate-200 bg-white text-slate-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                                                        ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-900 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-200'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600'
                                                 }`}
                                             >
-                                                <Pill className="h-4 w-4 text-emerald-600" />
-                                                <span className="text-xs">
-                                                    Counter Pickup
-                                                </span>
+                                                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                                                    <Pill className="h-4 w-4" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-bold">
+                                                            Counter Pickup
+                                                        </span>
+                                                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                                            FREE
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-0.5 text-[11px] font-normal text-slate-500 dark:text-zinc-400">
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .pickup.subtitle
+                                                        }{' '}
+                                                        •{' '}
+                                                        {
+                                                            DELIVERY_OPTIONS
+                                                                .pickup.eta
+                                                        }
+                                                    </p>
+                                                </div>
                                             </button>
                                         </div>
+
+                                        {/* Notice for ride-hailing couriers */}
+                                        {(deliveryType === 'yango' ||
+                                            deliveryType === 'indrive') && (
+                                            <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/90 p-2.5 text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+                                                <span className="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                                                <span>
+                                                    A PharmacyCat staff member
+                                                    will book your courier and
+                                                    call you to confirm.
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Contact info */}
@@ -1477,7 +1712,7 @@ export default function Welcome() {
                                                 />
                                             </div>
                                         </div>
-                                        {deliveryType === 'delivery' && (
+                                        {deliveryType !== 'pickup' && (
                                             <div>
                                                 <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">
                                                     Delivery Address
@@ -1784,7 +2019,7 @@ export default function Welcome() {
                                     </p>
 
                                     {/* Order receipt box */}
-                                    <div className="mt-6 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left text-xs dark:border-zinc-800 dark:bg-zinc-800/40">
+                                    <div className="mt-6 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left font-sans text-xs dark:border-zinc-800 dark:bg-zinc-800/40">
                                         <div className="flex justify-between border-b border-slate-200 pb-2.5 font-bold text-slate-900 dark:border-zinc-700 dark:text-white">
                                             <span>Order Number</span>
                                             <span className="font-mono text-emerald-600 dark:text-emerald-400">
@@ -1794,9 +2029,17 @@ export default function Welcome() {
 
                                         <div className="space-y-1.5 text-slate-600 dark:text-zinc-300">
                                             <div className="flex justify-between">
+                                                <span>
+                                                    Fulfillment / Courier
+                                                </span>
+                                                <span className="font-bold text-slate-900 dark:text-white">
+                                                    {orderResult.courierName}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
                                                 <span>Estimated Delivery</span>
                                                 <span className="font-bold text-slate-900 dark:text-white">
-                                                    30 - 45 Minutes
+                                                    {orderResult.eta}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
@@ -1809,7 +2052,12 @@ export default function Welcome() {
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span>Delivery Address</span>
+                                                <span>
+                                                    {orderResult.deliveryType ===
+                                                    'pickup'
+                                                        ? 'Pickup Location'
+                                                        : 'Delivery Address'}
+                                                </span>
                                                 <span className="max-w-[200px] truncate text-right font-bold text-slate-900 dark:text-white">
                                                     {
                                                         orderResult.deliveryAddress
@@ -1817,6 +2065,21 @@ export default function Welcome() {
                                                 </span>
                                             </div>
                                         </div>
+
+                                        {(orderResult.deliveryType ===
+                                            'yango' ||
+                                            orderResult.deliveryType ===
+                                                'indrive') && (
+                                            <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/90 p-2.5 text-left text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+                                                🛵{' '}
+                                                <strong>
+                                                    Courier Dispatch:
+                                                </strong>{' '}
+                                                A PharmacyCat staff member will
+                                                book your courier and call you
+                                                to confirm.
+                                            </div>
+                                        )}
 
                                         <div className="border-t border-slate-200 pt-2.5 dark:border-zinc-700">
                                             <span className="mb-2 block font-bold text-slate-900 dark:text-white">
@@ -1832,12 +2095,26 @@ export default function Welcome() {
                                                     (item) => (
                                                         <div
                                                             key={item.id}
-                                                            className="flex justify-between text-[11px] text-slate-600 dark:text-zinc-400"
+                                                            className="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-zinc-400"
                                                         >
-                                                            <span>
-                                                                {item.quantity}x{' '}
-                                                                {item.name}
-                                                            </span>
+                                                            <div className="flex min-w-0 items-center gap-2">
+                                                                {item.image && (
+                                                                    <img
+                                                                        src={
+                                                                            item.image
+                                                                        }
+                                                                        alt=""
+                                                                        className="h-9 w-9 shrink-0 rounded-lg object-cover"
+                                                                    />
+                                                                )}
+                                                                <span className="truncate">
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                    x{' '}
+                                                                    {item.name}
+                                                                </span>
+                                                            </div>
                                                             <span>
                                                                 K
                                                                 {(

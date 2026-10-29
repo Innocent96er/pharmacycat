@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     Phone,
     Mail,
@@ -13,9 +13,10 @@ import {
     ShieldCheck,
     MessageCircle,
     Smartphone,
+    LogOut,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login, logout, register } from '@/routes';
 
 interface Props {
     status?: string;
@@ -135,12 +136,24 @@ export default function Contact({ status }: Props) {
 
                         <div className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-3 dark:border-zinc-800">
                             {auth?.user ? (
-                                <Link
-                                    href={dashboard()}
-                                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
-                                >
-                                    Dashboard
-                                </Link>
+                                <>
+                                    <Link
+                                        href={dashboard()}
+                                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link
+                                        href={logout()}
+                                        method="post"
+                                        as="button"
+                                        onClick={() => router.flushAll()}
+                                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-rose-900/50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400"
+                                    >
+                                        <LogOut className="h-3.5 w-3.5" />
+                                        Log out
+                                    </Link>
+                                </>
                             ) : (
                                 <>
                                     <Link

@@ -532,6 +532,13 @@ export default function Welcome() {
                         >
                             Contact
                         </Link>
+                        <Link
+                            href="/medicines"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                        >
+                            <Pill className="h-3.5 w-3.5" />
+                            Inventory CRUD
+                        </Link>
                     </nav>
 
                     {/* Actions: Cart Button & Auth */}

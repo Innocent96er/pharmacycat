@@ -73,6 +73,6 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'PharmacyCat')),
     ],
 
-    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'pharmarcycat@gmail.com'),
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'pharmacycat@gmail.com'),
 
 ];

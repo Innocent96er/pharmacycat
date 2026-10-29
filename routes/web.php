@@ -9,7 +9,15 @@ use Inertia\Inertia;
 
 Route::inertia('/', 'welcome')->name('home');
 
-Route::resource('medicines', MedicineController::class);
+Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])->group(function () {
+    Route::resource('medicines', MedicineController::class)->only(['create', 'store', 'edit', 'update']);
+});
+
+Route::resource('medicines', MedicineController::class)->only(['index', 'show']);
+
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::delete('medicines/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
+});
 
 Route::get('contact', [ContactController::class, 'show'])->name('contact');
 Route::post('contact', [ContactController::class, 'send'])->name('contact.send');

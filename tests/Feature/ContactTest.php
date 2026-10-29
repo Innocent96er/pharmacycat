@@ -11,6 +11,7 @@ test('contact page can be viewed', function () {
 
 test('visitors can submit contact enquiry and deliver to business email', function () {
     Mail::fake();
+    config(['mail.admin_address' => 'pharmacycat@gmail.com']);
 
     $response = $this->post(route('contact.send'), [
         'name' => 'Jane Customer',
@@ -23,7 +24,7 @@ test('visitors can submit contact enquiry and deliver to business email', functi
     $response->assertSessionHas('status');
 
     Mail::assertQueued(ContactEnquiry::class, function ($mail) {
-        return $mail->hasTo('pharmarcycat@gmail.com')
+        return $mail->hasTo('pharmacycat@gmail.com')
             && $mail->enquiry['sender_name'] === 'Jane Customer';
     });
 });

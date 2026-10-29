@@ -37,6 +37,18 @@ class ProductSeeder extends Seeder
             ['Digital Thermometer', 'Fast, accurate digital reading.', null, 'Medical Devices', 9.50, 'otc'],
             ['Blood Pressure Monitor', 'Automatic upper-arm monitor.', null, 'Medical Devices', 45.00, 'otc'],
             ['Salbutamol Inhaler 100mcg', 'Reliever inhaler for asthma.', 'Salbutamol', 'Medical Devices', 13.75, 'rx'],
+            ['Aspirin 300mg', 'Relieves pain and reduces fever.', 'Aspirin', 'Pain Relief', 3.80, 'otc'],
+            ['Cetirizine 10mg', 'Allergy relief tablets.', 'Cetirizine', 'Cold & Flu', 5.50, 'otc'],
+            ['Omega-3 Fish Oil', 'Supports heart health.', 'Fish oil', 'Vitamins & Supplements', 14.20, 'otc'],
+            ['Calcium + Vitamin D', 'Supports strong bones.', 'Calcium carbonate', 'Vitamins & Supplements', 11.30, 'otc'],
+            ['Elastic Bandage', 'Support for sprains.', null, 'First Aid', 5.90, 'otc'],
+            ['Baby Shampoo', 'Tear-free gentle wash.', null, 'Baby Care', 6.10, 'otc'],
+            ['Glucose Meter', 'Home blood sugar monitor.', null, 'Medical Devices', 29.00, 'otc'],
+            ['Lisinopril 10mg', 'Treats high blood pressure.', 'Lisinopril', 'Medical Devices', 9.60, 'rx'],
+            ['Metformin 500mg', 'Treats type 2 diabetes.', 'Metformin', 'Medical Devices', 8.40, 'rx'],
+            ['Throat Lozenges', 'Soothes a sore throat.', 'Menthol', 'Cold & Flu', 3.40, 'otc'],
+            ['Magnesium 400mg', 'Supports muscles and sleep.', 'Magnesium citrate', 'Vitamins & Supplements', 10.75, 'otc'],
+            ['Sunscreen SPF 50', 'Broad-spectrum protection.', null, 'First Aid', 12.00, 'otc'],
         ];
 
         foreach ($products as [$name, $description, $ingredient, $category, $price, $type]) {

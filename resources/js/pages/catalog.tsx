@@ -135,8 +135,8 @@ export default function Catalog({
                         Pharmacy &amp; Health Supplies
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Search the catalog and narrow it down by category,
-                        price and prescription type.
+                        Search the catalog and narrow it down by category, price
+                        and prescription type.
                     </p>
                 </div>
 

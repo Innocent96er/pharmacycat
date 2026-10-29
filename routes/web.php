@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\OrderController;
@@ -15,6 +16,7 @@ Route::post('checkout', [OrderController::class, 'store'])->name('checkout.store
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('catalog', [CatalogController::class, 'index'])->name('catalog');
 });
 
 require __DIR__.'/settings.php';

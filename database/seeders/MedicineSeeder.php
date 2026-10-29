@@ -96,7 +96,7 @@ class MedicineSeeder extends Seeder
                     'category' => $category,
                     'price' => $price,
                     'stock_quantity' => $stock,
-                    'in_stock' => $stock > 0,
+                    'in_stock' => true,
                     'badge' => null,
                     'description' => $name.' - pharmacy catalog product.',
                     'manufacturer' => 'Please verify supplier',

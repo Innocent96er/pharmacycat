@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(MedicineSeeder::class);
+        $this->call(ProductSeeder::class);
     }
 }

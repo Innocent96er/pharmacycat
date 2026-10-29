@@ -44,4 +44,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
 
     }
+
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
 }

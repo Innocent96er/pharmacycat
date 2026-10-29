@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -17,10 +18,14 @@ use Illuminate\Support\Carbon;
  * @property string $category
  * @property string $price
  * @property string $prescription_type
+ * @property int|null $category_id
+ * @property int $stock
+ * @property string|null $image
+ * @property bool $is_featured
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'description', 'active_ingredient', 'category', 'price', 'prescription_type'])]
+#[Fillable(['name', 'description', 'active_ingredient', 'category', 'price', 'prescription_type', 'category_id', 'stock', 'image', 'is_featured'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -42,6 +47,18 @@ class Product extends Model
         'Cold & Flu',
         'Medical Devices',
     ];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['is_featured' => 'boolean'];
+    }
+
+    /** @return BelongsTo<Category, $this> */
+    public function productCategory(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 
     /**
      * Keyword search: name, description or active ingredient (case-insensitive, partial match).

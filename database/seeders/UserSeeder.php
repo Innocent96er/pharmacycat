@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
             $user->forceFill([
                 'name' => $data['name'],
                 'role' => $data['role'],
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),   // demo only, change before any real use
             ])->save();
         }

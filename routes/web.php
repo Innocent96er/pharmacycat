@@ -11,7 +11,18 @@ Route::post('contact', [ContactController::class, 'send'])->name('contact.send')
 Route::post('checkout', [OrderController::class, 'store'])->name('checkout.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', function () {
+        $user = auth()->user();
+
+        if ($user->hasRole('customer')) {
+            return redirect()->route('catalog');
+        }
+
+        return Route::has('admin.dashboard')
+            ? redirect()->route('admin.dashboard')
+            : Inertia::render('dashboard');
+    })->name('dashboard');
+
     Route::get('catalog', [CatalogController::class, 'index'])->name('catalog');
 });
 

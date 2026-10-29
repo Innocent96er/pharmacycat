@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->unsignedInteger('stock')->default(0);
-            $table->string('image')->nullable();
-            $table->boolean('is_featured')->default(false);
+            $table->string('active_ingredient')->nullable();
+            $table->string('category')->index();
+            $table->decimal('price', 8, 2)->index();
+            $table->string('prescription_type')->index(); // otc | rx
             $table->timestamps();
         });
     }

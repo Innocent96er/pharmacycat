@@ -73,7 +73,11 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/',
+
+    'redirects' => [
+        'register' => '/email/verify',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -143,7 +147,9 @@ return [
     */
 
     'features' => [
+        Features::registration(),
         Features::resetPasswords(),
+        Features::emailVerification(),
     ],
 
 ];

@@ -3,6 +3,7 @@ export type User = {
     name: string;
     email: string;
     avatar?: string;
+    role: 'admin' | 'pharmacist' | 'customer';
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
@@ -11,4 +12,8 @@ export type User = {
 
 export type Auth = {
     user: User;
+    can: {
+        manageProducts: boolean;
+        deleteProducts: boolean;
+    };
 };

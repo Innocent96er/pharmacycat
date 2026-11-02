@@ -22,16 +22,20 @@ use Illuminate\Support\Carbon;
  * @property int $stock
  * @property string|null $image
  * @property bool $is_featured
+ * @property string|null $dosage
+ * @property string|null $badge
+ * @property string|null $manufacturer
+ * @property Carbon|null $expiry_date
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'description', 'active_ingredient', 'category', 'price', 'prescription_type', 'category_id', 'stock', 'image', 'is_featured'])]
+#[Fillable(['name', 'description', 'active_ingredient', 'dosage', 'category', 'price', 'prescription_type', 'category_id', 'stock', 'image', 'is_featured', 'badge', 'manufacturer', 'expiry_date'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
-    public const PER_PAGE = 5;
+    public const PER_PAGE = 10;
 
     public const OTC = 'otc';
 
@@ -46,12 +50,35 @@ class Product extends Model
         'Baby Care',
         'Cold & Flu',
         'Medical Devices',
+        'Antibiotics',
+        'Skincare',
+        'Other',
     ];
+
+    /** @var array<int, string> */
+    protected $appends = ['image_url'];
 
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['is_featured' => 'boolean'];
+        return [
+            'is_featured' => 'boolean',
+            'expiry_date' => 'date',
+            'stock' => 'integer',
+        ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image) {
+            return null;
+        }
+
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://') || str_starts_with($this->image, '/')) {
+            return $this->image;
+        }
+
+        return asset('storage/' . $this->image);
     }
 
     /** @return BelongsTo<Category, $this> */

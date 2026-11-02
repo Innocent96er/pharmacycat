@@ -1,5 +1,14 @@
-﻿import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Package, Pill } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    LayoutGrid,
+    Package,
+    Pill,
+    ShoppingCart,
+    Tags,
+    Store,
+    BookOpen,
+    FolderGit2,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,50 +25,81 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Medicine Catalog',
-        href: '/medicines',
-        icon: Pill,
-    },
-    {
-        title: 'Catalog',
-        href: '/catalog',
-        icon: Package,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
     const { auth } = usePage().props;
+    const isStaff =
+        auth?.user?.role === 'admin' ||
+        auth?.user?.role === 'pharmacist' ||
+        auth?.can?.manageProducts;
 
-    const visibleNavItems = mainNavItems.filter(
-        (item) => item.href !== '/medicines' || auth.can.manageProducts,
-    );
+    const staffNavItems: NavItem[] = [
+        {
+            title: 'Admin Dashboard',
+            href: '/admin/dashboard',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Products (CRUD)',
+            href: '/admin/products',
+            icon: Package,
+        },
+        {
+            title: 'Orders',
+            href: '/admin/orders',
+            icon: ShoppingCart,
+        },
+        {
+            title: 'Categories',
+            href: '/admin/categories',
+            icon: Tags,
+        },
+        {
+            title: 'Medicine Catalog',
+            href: '/medicines',
+            icon: Pill,
+        },
+        {
+            title: 'View Storefront',
+            href: '/',
+            icon: Store,
+        },
+    ];
+
+    const customerNavItems: NavItem[] = [
+        {
+            title: 'Storefront',
+            href: '/',
+            icon: Store,
+        },
+        {
+            title: 'Medicine Catalog',
+            href: '/catalog',
+            icon: Package,
+        },
+    ];
+
+    const navItems = isStaff ? staffNavItems : customerNavItems;
+
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'View Public Store',
+            href: '/',
+            icon: Store,
+        },
+        {
+            title: 'Product Catalog',
+            href: '/catalog',
+            icon: Package,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={isStaff ? '/admin/dashboard' : dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -68,7 +108,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={visibleNavItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>

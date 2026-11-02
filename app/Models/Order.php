@@ -8,12 +8,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    protected $fillable = ['user_id', 'total_amount', 'status'];
+    protected $fillable = [
+        'user_id',
+        'order_number',
+        'customer_name',
+        'customer_email',
+        'customer_phone',
+        'delivery_address',
+        'delivery_type',
+        'payment_method',
+        'subtotal',
+        'delivery_fee',
+        'total_amount',
+        'status',
+    ];
 
     protected function casts(): array
     {
         return [
             'total_amount' => 'decimal:2',
+            'subtotal' => 'decimal:2',
+            'delivery_fee' => 'decimal:2',
         ];
     }
 

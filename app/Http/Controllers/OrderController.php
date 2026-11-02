@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderConfirmed;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -78,6 +81,43 @@ class OrderController extends Controller
             'total' => 'K'.number_format((float) $validated['total'], 2),
             'placed_at' => now()->toFormattedDateString(),
         ];
+
+        try {
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'order_number' => $orderNumber,
+                'customer_name' => $validated['customer_name'],
+                'customer_email' => $validated['customer_email'],
+                'customer_phone' => $validated['customer_phone'],
+                'delivery_address' => $validated['delivery_address'],
+                'delivery_type' => $validated['delivery_type'],
+                'payment_method' => $validated['payment_method'],
+                'subtotal' => $validated['subtotal'],
+                'delivery_fee' => $validated['delivery_fee'],
+                'total_amount' => $validated['total'],
+                'status' => 'pending',
+            ]);
+
+            foreach ($validated['items'] as $item) {
+                $productId = $item['id'] ?? null;
+                if (! $productId || ! Product::where('id', $productId)->exists()) {
+                    $productId = Product::where('name', $item['name'])->value('id');
+                }
+
+                if ($productId) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $productId,
+                        'quantity' => (int) $item['qty'],
+                        'unit_price' => (float) $item['price'],
+                    ]);
+
+                    Product::where('id', $productId)->decrement('stock', min((int) $item['qty'], Product::where('id', $productId)->value('stock') ?? 0));
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed to save order in database: '.$e->getMessage());
+        }
 
         // Send email confirmation
         try {

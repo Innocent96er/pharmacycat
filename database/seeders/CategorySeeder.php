@@ -12,9 +12,12 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             'Pain Relief',
-            'Vitamins',
+            'Vitamins & Supplements',
             'Antibiotics',
             'Cold & Flu',
+            'First Aid',
+            'Baby Care',
+            'Medical Devices',
             'Skincare',
             'Other',
         ];

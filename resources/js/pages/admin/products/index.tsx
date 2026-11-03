@@ -29,6 +29,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import type { Auth } from '@/types/auth';
 
 interface Product {
     id: number;
@@ -75,7 +76,8 @@ interface Props {
 }
 
 export default function ProductsIndex({ products, categories, filters }: Props) {
-    const { flash } = usePage().props as {
+    const { auth, flash } = usePage().props as {
+        auth: Auth;
         flash?: { success?: string | null; error?: string | null };
     };
 
@@ -467,15 +469,17 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                                         </Link>
                                                     </Button>
 
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => setDeleteTarget(product)}
-                                                        className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
-                                                        title="Delete Product"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    {auth.can.deleteProducts && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setDeleteTarget(product)}
+                                                            className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
+                                                            title="Delete Product"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -526,7 +530,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
             </div>
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+            <Dialog open={auth.can.deleteProducts && !!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-rose-600">
@@ -575,4 +579,3 @@ ProductsIndex.layout = {
         },
     ],
 };
-

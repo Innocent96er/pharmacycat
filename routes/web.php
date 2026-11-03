@@ -59,12 +59,18 @@ Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])
 
         Route::patch('products/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.stock');
         Route::patch('products/{product}/toggle-featured', [AdminProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
-        Route::resource('products', AdminProductController::class);
+        Route::resource('products', AdminProductController::class)->except(['destroy']);
+        Route::delete('products/{product}', [AdminProductController::class, 'destroy'])
+            ->middleware('can:delete-products')
+            ->name('products.destroy');
 
         Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
         Route::resource('orders', AdminOrderController::class)->only(['index']);
 
-        Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update']);
+        Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])
+            ->middleware('can:delete-categories')
+            ->name('categories.destroy');
     });
 
 require __DIR__.'/settings.php';

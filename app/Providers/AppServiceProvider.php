@@ -58,5 +58,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('manage-products', fn (User $user): bool => $user->hasRole('admin', 'pharmacist'));
         Gate::define('delete-products', fn (User $user): bool => $user->hasRole('admin'));
+        Gate::define('delete-categories', fn (User $user): bool => $user->hasRole('admin'));
     }
 }

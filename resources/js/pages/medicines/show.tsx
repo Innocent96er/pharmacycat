@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Edit2,
@@ -11,6 +11,7 @@ import {
     Tag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { Auth } from '@/types/auth';
 
 interface Medicine {
     id: number;
@@ -33,6 +34,10 @@ interface Props {
 }
 
 export default function MedicinesShow({ medicine }: Props) {
+    const { auth } = usePage().props as {
+        auth: Omit<Auth, 'user'> & { user: Auth['user'] | null };
+    };
+
     const handleDelete = () => {
         if (confirm(`Are you sure you want to delete "${medicine.name}"?`)) {
             router.delete(`/medicines/${medicine.id}`);
@@ -58,13 +63,15 @@ export default function MedicinesShow({ medicine }: Props) {
                                 Edit Medicine
                             </Link>
                         </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleDelete}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </Button>
+                        {auth.user?.role === 'admin' && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleDelete}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </Button>
+                        )}
                     </div>
                 </div>
 

@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'can' => [
                     'manageProducts' => $request->user()?->can('manage-products') ?? false,
                     'deleteProducts' => $request->user()?->can('delete-products') ?? false,
+                    'deleteCategories' => $request->user()?->can('delete-categories') ?? false,
                 ],
             ],
             'flash' => [

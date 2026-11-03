@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus,
     Search,
@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { Auth } from '@/types/auth';
 
 interface Medicine {
     id: number;
@@ -53,6 +54,9 @@ export default function MedicinesIndex({
     categories,
     filters,
 }: Props) {
+    const { auth } = usePage().props as {
+        auth: Omit<Auth, 'user'> & { user: Auth['user'] | null };
+    };
     const [search, setSearch] = useState(filters.search || '');
     const [selectedCategory, setSelectedCategory] = useState(
         filters.category || 'All',
@@ -252,16 +256,21 @@ export default function MedicinesIndex({
                                                             <Edit2 className="h-4 w-4 text-blue-600" />
                                                         </Link>
                                                     </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            handleDelete(med)
-                                                        }
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 text-red-600" />
-                                                    </Button>
+                                                    {auth.user?.role ===
+                                                        'admin' && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    med,
+                                                                )
+                                                            }
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-red-600" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

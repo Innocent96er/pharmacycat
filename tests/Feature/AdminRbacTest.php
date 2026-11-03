@@ -4,6 +4,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 
+// These tests cover both allowed staff access and denied customer/destructive actions.
 test('admins and pharmacists can access management workspaces', function (string $role) {
     $user = User::factory()->create(['role' => $role]);
 

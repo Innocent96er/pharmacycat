@@ -15,6 +15,7 @@ class RoleMiddleware
     {
         $user = $request->user();
 
+        // Reject guests and users whose assigned role is not allowed on the route.
         if (! $user || ! in_array($user->role, $roles, true)) {
             abort(403, 'You do not have permission to access this page.');
         }

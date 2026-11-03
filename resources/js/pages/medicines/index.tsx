@@ -256,6 +256,7 @@ export default function MedicinesIndex({
                                                             <Edit2 className="h-4 w-4 text-blue-600" />
                                                         </Link>
                                                     </Button>
+                                                    {/* Admin-only affordance; the delete route enforces this too. */}
                                                     {auth.user?.role ===
                                                         'admin' && (
                                                         <Button

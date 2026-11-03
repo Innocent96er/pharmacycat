@@ -27,11 +27,13 @@ Route::get('storage/{path}', function (string $path) {
 })->where('path', '.*');
 
 Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])->group(function () {
+    // Both staff roles may create and edit medicines.
     Route::resource('medicines', MedicineController::class)->only(['create', 'store', 'edit', 'update']);
 });
 
 Route::resource('medicines', MedicineController::class)->only(['index', 'show']);
 
+// Only admins may remove medicines.
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('medicines/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
 });
@@ -55,11 +57,13 @@ Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Both staff roles can manage day-to-day inventory and fulfillment.
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::patch('products/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.stock');
         Route::patch('products/{product}/toggle-featured', [AdminProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
         Route::resource('products', AdminProductController::class)->except(['destroy']);
+        // Keep delete routes separate so the admin-only gate cannot be bypassed.
         Route::delete('products/{product}', [AdminProductController::class, 'destroy'])
             ->middleware('can:delete-products')
             ->name('products.destroy');
@@ -68,6 +72,7 @@ Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])
         Route::resource('orders', AdminOrderController::class)->only(['index']);
 
         Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update']);
+        // Category deletion is also restricted to admins.
         Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])
             ->middleware('can:delete-categories')
             ->name('categories.destroy');

@@ -56,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureGates(): void
     {
+        // Staff roles share catalog management; destructive actions are admin-only.
         Gate::define('manage-products', fn (User $user): bool => $user->hasRole('admin', 'pharmacist'));
         Gate::define('delete-products', fn (User $user): bool => $user->hasRole('admin'));
         Gate::define('delete-categories', fn (User $user): bool => $user->hasRole('admin'));

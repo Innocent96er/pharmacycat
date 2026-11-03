@@ -63,6 +63,7 @@ export default function MedicinesShow({ medicine }: Props) {
                                 Edit Medicine
                             </Link>
                         </Button>
+                        {/* Admin-only affordance; the delete route enforces this too. */}
                         {auth.user?.role === 'admin' && (
                             <Button
                                 variant="destructive"

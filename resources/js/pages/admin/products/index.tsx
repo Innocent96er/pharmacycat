@@ -469,6 +469,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                                         </Link>
                                                     </Button>
 
+                                                    {/* Hide destructive controls for roles that cannot delete products. */}
                                                     {auth.can.deleteProducts && (
                                                         <Button
                                                             variant="ghost"

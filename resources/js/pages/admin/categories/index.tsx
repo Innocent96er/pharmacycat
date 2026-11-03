@@ -157,6 +157,7 @@ export default function CategoriesIndex({ categories }: Props) {
                                                 >
                                                     <Edit2 className="h-4 w-4" />
                                                 </Button>
+                                                {/* Server authorization remains authoritative for category deletion. */}
                                                 {auth.can.deleteCategories && (
                                                     <Button
                                                         variant="ghost"

@@ -25,6 +25,7 @@ export function StoreHeader({ cartCount, onOpenCart }: StoreHeaderProps) {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    // Show staff links to admins and pharmacists; route middleware remains authoritative.
     const isStaff =
         auth?.user?.role === 'admin' || auth?.user?.role === 'pharmacist';
 
@@ -180,4 +181,3 @@ export function StoreHeader({ cartCount, onOpenCart }: StoreHeaderProps) {
         </header>
     );
 }
-

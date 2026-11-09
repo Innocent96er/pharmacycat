@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Activity,
     AlertCircle,
@@ -69,6 +69,10 @@ export default function Welcome({
     categories = [],
     totalProductsCount = 20,
 }: Props) {
+    const { auth } = usePage().props as {
+        auth?: { user?: { name: string; email: string; id: number } };
+    };
+
     const heroProduct = featuredProducts[0] || null;
 
     const {
@@ -620,7 +624,13 @@ export default function Welcome({
                 onSelectDelivery={setSelectedDelivery}
                 onUpdateQuantity={updateQuantity}
                 onRemoveItem={removeFromCart}
-                onProceedToCheckout={() => setIsCheckoutOpen(true)}
+                onProceedToCheckout={() => {
+                    if (!auth?.user) {
+                        router.visit('/login');
+                        return;
+                    }
+                    setIsCheckoutOpen(true);
+                }}
             />
 
             <CheckoutDialog

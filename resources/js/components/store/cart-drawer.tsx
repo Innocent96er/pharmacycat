@@ -1,11 +1,15 @@
+import { Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     CheckCircle2,
+    Lock,
+    LogIn,
     Minus,
     Plus,
     ShoppingBag,
     Trash2,
     Truck,
+    UserPlus,
     X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +55,10 @@ export function CartDrawer({
     onRemoveItem,
     onProceedToCheckout,
 }: CartDrawerProps) {
+    const { auth } = usePage().props as {
+        auth?: { user?: { name: string; email: string; id: number } };
+    };
+
     const freeDeliveryThreshold = 350;
     const freeProgress = Math.min(100, Math.round((subtotal / freeDeliveryThreshold) * 100));
     const remainingForFree = Math.max(0, freeDeliveryThreshold - subtotal);
@@ -251,17 +259,52 @@ export function CartDrawer({
                             </div>
                         </div>
 
-                        {/* CTA */}
-                        <Button
-                            onClick={() => {
-                                onClose();
-                                onProceedToCheckout();
-                            }}
-                            className="mt-4 w-full bg-emerald-600 py-5 text-sm font-bold text-white shadow-md hover:bg-emerald-700"
-                        >
-                            Proceed to Checkout (K{totalAmount.toFixed(2)})
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
+                        {/* Checkout CTA: Only authenticated customers can proceed */}
+                        {!auth?.user ? (
+                            <div className="mt-4 space-y-2">
+                                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-center text-xs text-amber-900 dark:text-amber-200">
+                                    <div className="flex items-center justify-center gap-1.5 font-bold">
+                                        <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                                        <span>Sign in required to check out</span>
+                                    </div>
+                                    <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                                        Your cart is securely saved. Please log in or register an account to confirm delivery and place your order.
+                                    </p>
+                                </div>
+
+                                <Button
+                                    asChild
+                                    className="w-full bg-emerald-600 py-5 text-sm font-bold text-white shadow-md hover:bg-emerald-700"
+                                >
+                                    <Link href="/login" onClick={onClose}>
+                                        <LogIn className="mr-2 h-4 w-4" />
+                                        Log In to Checkout (K{totalAmount.toFixed(2)})
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="w-full text-xs font-semibold"
+                                >
+                                    <Link href="/register" onClick={onClose}>
+                                        <UserPlus className="mr-1.5 h-3.5 w-3.5 text-emerald-600" />
+                                        New Customer? Register Here
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button
+                                onClick={() => {
+                                    onClose();
+                                    onProceedToCheckout();
+                                }}
+                                className="mt-4 w-full bg-emerald-600 py-5 text-sm font-bold text-white shadow-md hover:bg-emerald-700"
+                            >
+                                Proceed to Checkout (K{totalAmount.toFixed(2)})
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 )}
             </SheetContent>

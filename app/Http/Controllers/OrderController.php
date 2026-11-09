@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewOrderAlert;
 use App\Mail\OrderConfirmed;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -12,6 +13,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
+/**
+ * OrderController
+ *
+ * Handles the checkout lifecycle for customers on the PharmacyCat platform:
+ * 1. Validates delivery details, payment method, distance fees, and cart items.
+ * 2. Generates a unique tracking reference (e.g. PC-A1B2C3).
+ * 3. Persists the Order and OrderItem records in the database.
+ * 4. Automatically decrements inventory stock.
+ * 5. Dispatches SMTP email notifications to both the customer and pharmacy admin.
+ */
 class OrderController extends Controller
 {
     /**
@@ -19,6 +30,16 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        // STEP 0: Authentication gate — require users to be logged in or registered before checkout
+        if (! auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must be logged in or registered to place an order.',
+                'redirect' => route('login'),
+            ], 401);
+        }
+
+        // STEP 1: Strict input validation for customer details, delivery, and cart items
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
@@ -42,8 +63,10 @@ class OrderController extends Controller
             'total' => ['required', 'numeric'],
         ]);
 
+        // STEP 2: Generate a human-friendly unique order reference number
         $orderNumber = 'PC-'.strtoupper(Str::random(6));
 
+        // STEP 3: Normalize and format cart items for receipt presentation
         $formattedItems = array_map(function ($item) {
             return [
                 'name' => $item['name'],
@@ -53,6 +76,7 @@ class OrderController extends Controller
             ];
         }, $validated['items']);
 
+        // Determine clear courier display title
         $courierName = $validated['courier_name'] ?? match ($validated['delivery_type']) {
             'home_delivery', 'delivery' => 'Home Delivery (PharmacyCat Rider)',
             'yango' => 'Yango Delivery',
@@ -61,6 +85,7 @@ class OrderController extends Controller
             default => ucfirst($validated['delivery_type']),
         };
 
+        // Package receipt data for both email templates and frontend response
         $orderData = [
             'order_number' => $orderNumber,
             'customer_name' => $validated['customer_name'],
@@ -82,6 +107,7 @@ class OrderController extends Controller
             'placed_at' => now()->toFormattedDateString(),
         ];
 
+        // STEP 4: Persist the order record and order line items to SQLite/MySQL
         try {
             $order = Order::create([
                 'user_id' => auth()->id(),
@@ -98,6 +124,7 @@ class OrderController extends Controller
                 'status' => 'pending',
             ]);
 
+            // Save individual items and decrement live product inventory
             foreach ($validated['items'] as $item) {
                 $productId = $item['id'] ?? null;
                 if (! $productId || ! Product::where('id', $productId)->exists()) {
@@ -112,6 +139,7 @@ class OrderController extends Controller
                         'unit_price' => (float) $item['price'],
                     ]);
 
+                    // Decrement stock in real-time so other customers see updated availability
                     Product::where('id', $productId)->decrement('stock', min((int) $item['qty'], Product::where('id', $productId)->value('stock') ?? 0));
                 }
             }
@@ -119,13 +147,30 @@ class OrderController extends Controller
             Log::error('Failed to save order in database: '.$e->getMessage());
         }
 
-        // Send email confirmation
+        // STEP 5: Dispatch SMTP Emails
+        // A) Send order confirmation receipt to the customer
         try {
             Mail::to($validated['customer_email'])->send(new OrderConfirmed($orderData));
         } catch (\Throwable $e) {
             Log::warning('Failed to send order confirmation email: '.$e->getMessage());
         }
 
+        // B) Send new order alert to the pharmacy admin/staff
+        try {
+            Mail::send(new NewOrderAlert([
+                'order_number' => $orderNumber,
+                'customer_name' => $validated['customer_name'],
+                'customer_email' => $validated['customer_email'],
+                'total' => 'K'.number_format((float) $validated['total'], 2),
+                'items_count' => count($validated['items']),
+                'courier_name' => $courierName,
+                'delivery_type' => $validated['delivery_type'],
+            ]));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send admin order alert email: '.$e->getMessage());
+        }
+
+        // STEP 6: Return JSON confirmation back to the frontend checkout modal
         return response()->json([
             'success' => true,
             'message' => 'Your order has been placed successfully!',

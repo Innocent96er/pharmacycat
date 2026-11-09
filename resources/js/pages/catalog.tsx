@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowUpDown,
     Check,
@@ -101,6 +101,10 @@ export default function ProductsCatalog({
     priceBounds,
     filters,
 }: Props) {
+    const { auth } = usePage().props as {
+        auth?: { user?: { name: string; email: string; id: number } };
+    };
+
     const {
         items: cartItems,
         addToCart,
@@ -821,7 +825,13 @@ export default function ProductsCatalog({
                 onSelectDelivery={setSelectedDelivery}
                 onUpdateQuantity={updateQuantity}
                 onRemoveItem={removeFromCart}
-                onProceedToCheckout={() => setIsCheckoutOpen(true)}
+                onProceedToCheckout={() => {
+                    if (!auth?.user) {
+                        router.visit('/login');
+                        return;
+                    }
+                    setIsCheckoutOpen(true);
+                }}
             />
 
             {/* Checkout Dialog */}

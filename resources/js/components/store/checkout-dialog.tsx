@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     CheckCircle2,
@@ -87,6 +87,12 @@ export function CheckoutDialog({
 
     const handleSubmitOrder = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!auth?.user) {
+            toast.error('You must be logged in or registered to place an order.');
+            router.visit('/login');
+            return;
+        }
 
         if (items.length === 0) {
             toast.error('Your cart is empty.');

@@ -1,7 +1,20 @@
 <?php
 
+use App\Mail\NewOrderAlert;
 use App\Mail\OrderConfirmed;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->create());
+});
+
+test('unauthenticated guests cannot place orders and are rejected', function () {
+    auth()->logout();
+
+    $response = $this->postJson(route('checkout.store'), []);
+    $response->assertUnauthorized();
+});
 
 test('customers can place an order and receive confirmation', function () {
     Mail::fake();
@@ -57,6 +70,10 @@ test('customers can place an order and receive confirmation', function () {
         return $mail->hasTo('jane@example.com')
             && str_contains($html, url('/images/products/paracetamol.jpg'))
             && str_contains($html, 'Instrument Sans');
+    });
+
+    Mail::assertQueued(NewOrderAlert::class, function ($mail) {
+        return $mail->order['customer_name'] === 'Jane Doe';
     });
 });
 

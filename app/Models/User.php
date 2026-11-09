@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
+// Keep role out of mass assignment so registration/profile updates cannot grant privileges.
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
@@ -45,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     }
 
+    /** Return true when this user's assigned role matches any allowed role. */
     public function hasRole(string ...$roles): bool
     {
         return in_array($this->role, $roles, true);

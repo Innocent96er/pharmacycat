@@ -40,9 +40,11 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                // These flags control UI visibility; server routes still enforce authorization.
                 'can' => [
                     'manageProducts' => $request->user()?->can('manage-products') ?? false,
                     'deleteProducts' => $request->user()?->can('delete-products') ?? false,
+                    'deleteCategories' => $request->user()?->can('delete-categories') ?? false,
                 ],
             ],
             'flash' => [

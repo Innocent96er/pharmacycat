@@ -15,5 +15,6 @@ export type Auth = {
     can: {
         manageProducts: boolean;
         deleteProducts: boolean;
+        deleteCategories: boolean;
     };
 };

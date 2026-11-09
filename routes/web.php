@@ -42,13 +42,14 @@ Route::get('storage/{path}', function (string $path) {
 // --------------------------------------------------------------------------
 // Pharmacists and Admins can create and edit medicine entries.
 Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])->group(function () {
+    // Both staff roles may create and edit medicines.
     Route::resource('medicines', MedicineController::class)->only(['create', 'store', 'edit', 'update']);
 });
 
 // The public can view index listings and detail pages for medicines.
 Route::resource('medicines', MedicineController::class)->only(['index', 'show']);
 
-// Only Admins have destructive authorization (hard deletion of medicine records).
+// Only admins may remove medicines.
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('medicines/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
 });
@@ -81,20 +82,27 @@ Route::middleware(['auth', 'verified', 'role:admin,pharmacist'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        // Main Admin KPI Dashboard (revenue, order counts, low-stock warnings)
+        // Both staff roles can manage day-to-day inventory and fulfillment.
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Product Catalog & Stock Quick-Update Endpoints
         Route::patch('products/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.stock');
         Route::patch('products/{product}/toggle-featured', [AdminProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
-        Route::resource('products', AdminProductController::class);
+        Route::resource('products', AdminProductController::class)->except(['destroy']);
+        // Keep delete routes separate so the admin-only gate cannot be bypassed.
+        Route::delete('products/{product}', [AdminProductController::class, 'destroy'])
+            ->middleware('can:delete-products')
+            ->name('products.destroy');
 
         // Order Fulfillment Management
         Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
         Route::resource('orders', AdminOrderController::class)->only(['index']);
 
-        // Medicine Category Taxonomy
-        Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update']);
+        // Category deletion is also restricted to admins.
+        Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])
+            ->middleware('can:delete-categories')
+            ->name('categories.destroy');
     });
 
 require __DIR__.'/settings.php';

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { Auth } from '@/types/auth';
 
 interface Category {
     id: number;
@@ -28,7 +29,8 @@ interface Props {
 }
 
 export default function CategoriesIndex({ categories }: Props) {
-    const { flash } = usePage().props as {
+    const { auth, flash } = usePage().props as {
+        auth: Auth;
         flash?: { success?: string | null; error?: string | null };
     };
 
@@ -155,14 +157,17 @@ export default function CategoriesIndex({ categories }: Props) {
                                                 >
                                                     <Edit2 className="h-4 w-4" />
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleDelete(cat)}
-                                                    className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                {/* Server authorization remains authoritative for category deletion. */}
+                                                {auth.can.deleteCategories && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(cat)}
+                                                        className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -290,4 +295,3 @@ CategoriesIndex.layout = {
         },
     ],
 };
-

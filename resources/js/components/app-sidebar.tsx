@@ -27,6 +27,7 @@ import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     const { auth } = usePage().props;
+    // Staff navigation is a convenience; protected routes enforce access independently.
     const isStaff =
         auth?.user?.role === 'admin' ||
         auth?.user?.role === 'pharmacist' ||
